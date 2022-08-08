@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from posts.models import Comment, Follow, Group, Post
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
@@ -14,7 +13,7 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Post
-        read_only_fields = ('author', 'pub_date',)
+        read_only_fields = ('pub_date',)
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -58,9 +57,7 @@ class FollowSerializer(serializers.ModelSerializer):
         ]
 
     def validate_following(self, value):
-        current_user = self.context['request'].user
-        following = get_object_or_404(User, username=value)
-        if (current_user == following
+        if (self.context['request'].user == value
                 and self.context['request'].method == 'POST'):
             raise serializers.ValidationError(
                 'Нельзя подписаться на самого себя!'

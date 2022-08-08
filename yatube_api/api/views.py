@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from posts.models import Comment, Follow, Group, Post
+from posts.models import Group, Post
 from rest_framework import filters, mixins, permissions, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 
@@ -28,7 +28,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     """
     Возвращает список всех комментариев к посту.
     """
-    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (OwnerOrReadOnly,)
 
@@ -47,7 +46,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = (permissions.AllowAny,)
 
 
 class FollowViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
@@ -55,7 +53,6 @@ class FollowViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
     """
     Возвращает список подписок пользователей.
     """
-    queryset = Follow.objects.all()
     serializer_class = FollowSerializer
     permission_classes = (OwnerOrReadOnly, permissions.IsAuthenticated)
     filter_backends = (filters.SearchFilter,)
@@ -63,3 +60,6 @@ class FollowViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
     def get_queryset(self):
         return self.request.user.follower.all()
+
+    def perform_create(self, serializer):
+        serializer.save()
